@@ -1,6 +1,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:liquid_client/application/liquid_router.dart';
 import 'package:liquid_client/application/provider/record_page_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -75,7 +76,7 @@ class _RecordPageState extends State<RecordPage>{
     if(index == 0 || index == 2){
       recordPageProvider.setCurrentTabIndex(index);
     } else if(index == 1){
-      print('添加');
+      Navigator.of(context).pushNamed(LiquidRouter.RecordAdd);
     }
 
   }
