@@ -4,6 +4,7 @@ import 'package:liquid_client/application/provider/liquid_provider.dart';
 import 'package:liquid_client/cache/currency_cache.dart';
 import 'package:liquid_client/common/enum/network_request_state.dart';
 import 'package:liquid_client/common/model/currency_model.dart';
+import 'package:liquid_client/utils/format_util.dart';
 import 'package:provider/provider.dart';
 
 class CurrencySelectorPage extends StatefulWidget{
@@ -28,16 +29,11 @@ class _CurrencySelectorPageState extends State<CurrencySelectorPage>{
       navigationBar: CupertinoNavigationBar(
         middle: Text('请选择一种货币类型'),
       ),
-      child: Padding(
-        padding: EdgeInsets.only(
-          top: 42,
-        ),
-        child: Selector<LiquidProvider, NetworkRequestState>(
-          builder: buildContentPage,
-          selector: (buildContext, provider){
-            return provider.currencyRequestState;
-          },
-        ),
+      child: Selector<LiquidProvider, NetworkRequestState>(
+        builder: buildContentPage,
+        selector: (buildContext, provider){
+          return provider.currencyRequestState;
+        },
       ),
     );
   }
@@ -59,15 +55,21 @@ class _CurrencySelectorPageState extends State<CurrencySelectorPage>{
   }
 
   Widget buildLoadIdlePage(){
-    return Text('可以下拉刷新加载');
+    return SafeArea(
+      child: Text('可以下拉刷新加载'),
+    );
   }
 
   Widget buildLoadingPage(){
-    return Text('加载中');
+    return SafeArea(
+      child: Text('加载中'),
+    );
   }
 
   Widget buildLoadFailPage(){
-    return Text('加载失败');
+    return SafeArea(
+      child: Text('加载失败'),
+    );
   }
 
   Widget buildLoadSuccessPage(){
@@ -75,18 +77,49 @@ class _CurrencySelectorPageState extends State<CurrencySelectorPage>{
     return ListView.separated(
       itemBuilder: (listViewContext, index){
         CurrencyModel currencyModel = currencyModelList[index];
-        return Row(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Text('${currencyModel.shortName} - ${currencyModel.region} - ${currencyModel.name}'),
-          ],
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: 24,
+              vertical: 10,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(
+                    right: 16
+                  ),
+                  child: Image(
+                    image: AssetImage(FormatUtil.currencyShortNameToEmojiFlag(currencyModel.shortName)),
+                    width: 24,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Text('${currencyModel.region} - ${currencyModel.name} ( ${currencyModel.shortName} )'),
+              ],
+            ),
+          ),
+          onTap: (){ _onCurrencyClick(currencyModel, index); },
         );
       },
       separatorBuilder: (listViewContext, index){
-        return Divider();
+        return Divider(
+          height: 0.5,
+          thickness: 0.5,
+        );
       },
       itemCount: currencyModelList.length,
     );
   }
-  
+
+  void _onCurrencyClick(CurrencyModel currencyModel, int index){
+    print('选择了 $currencyModel');
+    Navigator.pop(context, {
+      'isSuccess' : true,
+      'result' : currencyModel,
+    });
+  }
+
 }

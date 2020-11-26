@@ -88,7 +88,7 @@ class _RecordAddPageState extends State<RecordAddPage>{
   }
 
   void _onTargetClick(){
-
+    Navigator.pushNamed(context, LiquidRouter.TargetSelector);
   }
 
   void _onCurrencyClick(){
@@ -119,6 +119,7 @@ class RecordAddPageSelectItem extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       child: Container(
         padding: EdgeInsets.symmetric(
           horizontal: 24,
