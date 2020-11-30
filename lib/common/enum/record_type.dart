@@ -1,0 +1,5 @@
+
+enum RecordType{
+  Income,
+  Outcome,
+}

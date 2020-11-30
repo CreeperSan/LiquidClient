@@ -19,6 +19,10 @@ class FormatUtil{
     return false;
   }
 
+  static String timestampToRecordTime(int timeStamp){
+    var time = DateTime.fromMillisecondsSinceEpoch(timeStamp);
+    return '${time.year}年${time.month}月${time.day}日 ${time.hour}时${time.minute}分${time.second}秒';
+  }
 
   static String currencyShortNameToEmojiFlag(String currencyShortName){
     switch(currencyShortName){
