@@ -4,7 +4,9 @@ import 'package:liquid_client/application/liquid_router.dart';
 import 'package:liquid_client/application/provider/record_add_page_provider.dart';
 import 'package:liquid_client/common/enum/record_type.dart';
 import 'package:liquid_client/common/model/currency_model.dart';
+import 'package:liquid_client/common/model/tag_model.dart';
 import 'package:liquid_client/common/model/target_model.dart';
+import 'package:liquid_client/compoment/time_picker_dialog.dart';
 import 'package:liquid_client/utils/format_util.dart';
 import 'package:provider/provider.dart';
 
@@ -167,7 +169,24 @@ class _RecordAddPageState extends State<RecordAddPage>{
 
                     // 标签
                     RecordAddPageSelectItem(
+                      showArrow: true,
                       name: '标签',
+                      onClick: _onTagClick,
+                      centerWidget: Selector<RecordAddPageProvider, List<TagModel>>(
+                        selector: (buildContext, provider){
+                          return provider.tagList;
+                        },
+                        builder: (buildContext, tagList, child){
+                          return Offstage(
+                            offstage: tagList != null && tagList.isNotEmpty,
+                            child: Text('请选择标签',
+                              style: TextStyle(
+                                color: CupertinoColors.systemGrey4,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                     RecordAddPageDivider(),
 
@@ -216,16 +235,11 @@ class _RecordAddPageState extends State<RecordAddPage>{
   }
 
   void _onTimeClick(){
-    print('交易时间');
-    showCupertinoDialog(
+    showCupertinoModalPopup(
       context: context,
-      builder: (context){
-        return CupertinoTimerPicker(
-          onTimerDurationChanged: (duration){
-            print(duration);
-          },
-        );
-      },
+      builder: (buildContext){
+        return TimePickerDialog();
+      }
     );
   }
 
@@ -253,6 +267,10 @@ class _RecordAddPageState extends State<RecordAddPage>{
       }
       context.read<RecordAddPageProvider>().setCurrencyModel(res['result']);
     });
+  }
+
+  void _onTagClick(){
+    Navigator.pushNamed(context, LiquidRouter.TagSelector);
   }
 
   void _onRemarkClick(){
@@ -316,7 +334,7 @@ class RecordAddPageSelectItem extends StatelessWidget{
               offstage: extendWidget == null,
               child: extendWidget == null ? Container() : Padding(
                 padding: EdgeInsets.only(
-                  top: 10
+                  top: 16
                 ),
                 child: extendWidget,
               ),

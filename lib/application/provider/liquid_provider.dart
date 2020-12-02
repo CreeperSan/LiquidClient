@@ -5,6 +5,7 @@ import 'package:liquid_client/common/model/currency_model.dart';
 import 'package:liquid_client/common/model/tag_model.dart';
 import 'package:liquid_client/common/model/target_model.dart';
 import 'package:liquid_client/network/model/currency/network_response_currency_list_model.dart';
+import 'package:liquid_client/network/model/tag/network_response_tag_list_model.dart';
 import 'package:liquid_client/network/model/target/network_response_target_list_model.dart';
 import 'package:liquid_client/network/network_manager.dart';
 
@@ -94,6 +95,33 @@ class LiquidProvider extends ChangeNotifier {
     }
     notifyListeners();
     return targetModelList;
+  }
+
+  /// 获取所有的标签
+  /// [forceRemote] 是否强制从网络中拉取
+  Future<List<TagModel>> loadTag({bool forceRemote = false}) async {
+    // 是否强制从网络中拉取
+    if(forceRemote){
+      tagRequestState = NetworkRequestState.Idle;
+    }
+    // 检查缓存
+    if(tagRequestState == NetworkRequestState.Success){
+      return tagModelList;
+    }
+    // 网络加载
+    tagRequestState = NetworkRequestState.Loading;
+    notifyListeners();
+    await Future.delayed(Duration(seconds: 1));
+    NetworkResponseTagListResponse targetListResponse = await NetworkManager.tagGetList();
+    if(targetListResponse.isSuccess()){
+      tagRequestState = NetworkRequestState.Success;
+      tagModelList.clear();
+      tagModelList.addAll(targetListResponse.tagModelList);
+    } else {
+      tagRequestState = NetworkRequestState.Fail;
+    }
+    notifyListeners();
+    return tagModelList;
   }
 
 }

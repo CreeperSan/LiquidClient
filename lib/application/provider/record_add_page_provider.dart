@@ -2,6 +2,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:liquid_client/common/enum/record_type.dart';
 import 'package:liquid_client/common/model/currency_model.dart';
+import 'package:liquid_client/common/model/tag_model.dart';
 import 'package:liquid_client/common/model/target_model.dart';
 import 'package:liquid_client/utils/format_util.dart';
 
@@ -12,6 +13,7 @@ class RecordAddPageProvider extends ChangeNotifier {
   String remark;                                                                // 备注
   int money;                                                                    // 金额
   int time = DateTime.now().millisecondsSinceEpoch;                             // 交易发生时间的时间戳
+  List<TagModel> tagList = [];                                             // 已选择的标签
 
   void setCurrencyModel(CurrencyModel model){
     currencyModel = model;
@@ -35,6 +37,11 @@ class RecordAddPageProvider extends ChangeNotifier {
 
   void setTime(int timestamp){
     time = timestamp;
+    notifyListeners();
+  }
+
+  void setTagList(List<TagModel> tagList){
+    this.tagList = tagList;
     notifyListeners();
   }
 
