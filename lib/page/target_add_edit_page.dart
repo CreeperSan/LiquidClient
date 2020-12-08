@@ -6,13 +6,7 @@ import 'package:liquid_client/network/model/target/network_response_target_list_
 import 'package:liquid_client/network/network_manager.dart';
 import 'package:liquid_client/toast/toast_manager.dart';
 
-enum TargetAddEditPageType{
-  Add,
-  Edit,
-}
-
 class TargetAddEditPage extends StatefulWidget{
-  final TargetAddEditPageType type = TargetAddEditPageType.Add;
   TargetModel targetModel;
 
   @override
@@ -21,11 +15,11 @@ class TargetAddEditPage extends StatefulWidget{
   }
 
   bool isAdd(){
-    return type == TargetAddEditPageType.Add;
+    return targetModel == null || targetModel.id <= 0;
   }
 
   bool isEdit(){
-    return type == TargetAddEditPageType.Edit;
+    return !isAdd();
   }
 
 }

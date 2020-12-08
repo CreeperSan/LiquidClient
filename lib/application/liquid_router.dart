@@ -2,6 +2,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:liquid_client/application/provider/record_add_page_provider.dart';
 import 'package:liquid_client/application/provider/record_page_provider.dart';
+import 'package:liquid_client/application/provider/target_selector_page_provider.dart';
 import 'package:liquid_client/page/boot_page.dart';
 import 'package:liquid_client/page/currency_selector_page.dart';
 import 'package:liquid_client/page/login_page.dart';
@@ -42,7 +43,10 @@ class LiquidRouter{
       return TagSelectorPage();
     },
     TargetSelector : (BuildContext context){
-      return TargetSelectorPage();
+      return ChangeNotifierProvider<TargetSelectorPageProvider>.value(
+        value: TargetSelectorPageProvider(),
+        child: TargetSelectorPage(),
+      );
     },
     TargetSelectorAddEdit : (BuildContext context){
       return TargetAddEditPage();
