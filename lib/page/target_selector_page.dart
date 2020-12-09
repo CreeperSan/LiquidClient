@@ -7,7 +7,10 @@ import 'package:liquid_client/application/provider/target_selector_page_provider
 import 'package:liquid_client/cache/target_cache.dart';
 import 'package:liquid_client/common/enum/network_request_state.dart';
 import 'package:liquid_client/common/model/target_model.dart';
+import 'package:liquid_client/compoment/cupertino_loading_dialog.dart';
+import 'package:liquid_client/network/model/target/network_response_target_delete_model.dart';
 import 'package:liquid_client/network/network_manager.dart';
+import 'package:liquid_client/toast/toast_manager.dart';
 import 'package:provider/provider.dart';
 
 class TargetSelectorPage extends StatefulWidget{
@@ -35,7 +38,7 @@ class _TargetSelectorPageState extends State<TargetSelectorPage>{
     ), (){
       LiquidProvider liquidProvider = context.read<LiquidProvider>();
       TargetSelectorPageProvider pageProvider = context.read<TargetSelectorPageProvider>();
-      liquidProvider.loadTarget();
+      liquidProvider.loadTarget(forceRemote: true);
       pageProvider.setPageType(widget.pageType);
     });
 
@@ -303,7 +306,59 @@ class _TargetSelectorPageState extends State<TargetSelectorPage>{
   }
 
   void _onTargetDeleteClick(TargetModel model){
-    print('删除对象');
+    showCupertinoDialog(
+      context: context,
+      builder: (dialogContext){
+        return CupertinoAlertDialog(
+          title: Text('删除对象'),
+          content: Text('确认删除对象 ${model.name} 吗？此操作不可逆'),
+          actions: [
+            CupertinoDialogAction(
+              child: Text('确定'),
+              onPressed: (){
+                Navigator.pop(dialogContext);
+                _onDeleteDialogClick(model);
+              },
+            ),
+            CupertinoDialogAction(
+              child: Text('取消'),
+              onPressed: () => Navigator.pop(dialogContext),
+            ),
+          ],
+        );
+      }
+    );
+  }
+
+  void _onDeleteDialogClick(TargetModel targetModel) async {
+    // CupertinoLoadingDialog loadingDialog = CupertinoLoadingDialog(
+    //   message: '正在删除对象',
+    // );
+    // _showDialog(loadingDialog);
+    // loadingDialog.close();
+
+    ToastManager.show('正在删除 ${targetModel.name}');
+
+    NetworkResponseTargetDeleteResponse response = await NetworkManager.targetDelete(targetModel.id);
+
+    if(response.isSuccess()){
+      ToastManager.show('成功删除对象 ${targetModel.name}');
+      context.read<LiquidProvider>().loadTarget(
+        forceRemote: true,
+      );
+    } else {
+      ToastManager.show(response.message);
+    }
+
+  }
+
+  void _showDialog(Widget dialog){
+    showCupertinoDialog(
+      context: context,
+      builder: (dialogContext){
+        return dialog;
+      }
+    );
   }
 
   void _onTargetEditClick(TargetModel model){
@@ -315,7 +370,14 @@ class _TargetSelectorPageState extends State<TargetSelectorPage>{
   void _onTargetCreateClick(){
     Navigator.pushNamed(context, LiquidRouter.TargetSelectorAddEdit,
       arguments: null
-    );
+    ).then((value){
+      Map response = (value as Map) ?? {};
+      if(response['isSuccess'] == true){
+        context.read<LiquidProvider>().loadTarget(
+          forceRemote: true,
+        );
+      }
+    });
   }
 
   void _onNavigationBarEditClick(){

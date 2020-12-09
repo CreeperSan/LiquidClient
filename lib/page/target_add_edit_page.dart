@@ -66,7 +66,9 @@ class _TargetAddEditPageState extends State<TargetAddEditPage>{
       NetworkResponseTargetAddResponse response = await NetworkManager.targetAdd(controller.text);
       if(response.isSuccess()){
         ToastManager.show('对象新建成功');
-        Navigator.pop(context);
+        Navigator.pop(context, {
+          'isSuccess' : true,
+        });
       } else {
         ToastManager.show(response.message);
       }

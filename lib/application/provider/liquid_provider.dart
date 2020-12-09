@@ -84,7 +84,7 @@ class LiquidProvider extends ChangeNotifier {
     // 网络加载
     targetRequestState = NetworkRequestState.Loading;
     notifyListeners();
-    await Future.delayed(Duration(seconds: 1));
+    await Future.delayed(Duration(milliseconds: 500));
     NetworkResponseTargetListResponse targetListResponse = await NetworkManager.targetGetList();
     if(targetListResponse.isSuccess()){
       targetRequestState = NetworkRequestState.Success;

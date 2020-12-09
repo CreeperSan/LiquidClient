@@ -1,5 +1,5 @@
 enum NetworkRequestState{
-  Idle,
+  @deprecated Idle,
   Loading,
   Success,
   Fail,

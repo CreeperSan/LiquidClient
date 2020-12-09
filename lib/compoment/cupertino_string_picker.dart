@@ -17,6 +17,7 @@ class CupertinoStringPicker extends StatefulWidget{
     this.defaultPosition = 0,
     this.width = 64,
     this.height = 300,
+    this.onSelectItemChange,
   });
 
 
@@ -43,9 +44,6 @@ class CupertinoStringPickerState<T> extends State<CupertinoStringPicker>{
     scrollerController = FixedExtentScrollController(
       initialItem: widget.defaultPosition,
     );
-    scrollerController.addListener(() {
-      print('scrollChange : ${DateTime.now().toString()}');
-    });
   }
 
   @override
