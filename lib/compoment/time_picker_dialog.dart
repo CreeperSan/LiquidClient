@@ -1,207 +1,72 @@
-import 'package:flutter/cupertino.dart';
-import 'package:liquid_client/compoment/cupertino_string_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' as Cupertino;
+import 'package:liquid_client/compoment/cupertino_picker_without_divider.dart';
 
-class TimePickerDialog extends StatefulWidget{
+/// 选择时间后底部弹出的对话框
+
+class TimePickerDialog extends StatefulWidget {
   int year;
   int month;
   int day;
   int hour;
   int minute;
   int second;
+  void Function(DateTime time) onConfirm;
 
-  TimePickerDialog(){
-    DateTime currentDateTime = DateTime.now();
-    year = currentDateTime.year;
-    month = currentDateTime.month;
-    day = currentDateTime.day;
-    hour = currentDateTime.hour;
-    minute = currentDateTime.minute;
-    second = currentDateTime.second;
+  TimePickerDialog({
+    this.year,
+    this.month,
+    this.day,
+    this.hour,
+    this.minute,
+    this.second,
+    this.onConfirm,
+  }){
+    // 如果没有指定时间的话，则采用当前时间往后的5分钟的整数倍时间
+    DateTime nowTime;
+    if(year == null || month == null || day == null || hour == null || minute == null){
+      nowTime = DateTime.now();
+    } else {
+      nowTime = DateTime(year, month, day, hour, minute, second);
+    }
+    
+    year = nowTime.year;
+    month = nowTime.month;
+    day = nowTime.day;
+    hour = nowTime.hour;
+    minute = nowTime.minute;
+    second = nowTime.second;
   }
-
-  TimePickerDialog.specify({
-    @required this.year,
-    @required this.month,
-    @required this.day,
-    @required this.hour,
-    @required this.minute,
-    @required this.second,
-  });
 
   @override
   State<StatefulWidget> createState() {
-    return TimePickerDialogState();
+    return _TimePickerDialogState();
   }
 
 }
 
-class TimePickerDialogState extends State<TimePickerDialog>{
-  final double pickerHeight = 300;
-  final int yearOffset = 1970;
+class _TimePickerDialogState extends State<TimePickerDialog>{
+  static List<int> _yearList = createIntRange(1970, 2050);
+  static List<int> _monthList = createIntRange(1, 12);
+  static List<int> _dayList31 = createIntRange(1, 31);
+  static List<int> _hourList = createIntRange(0, 23);
+  static List<int> _minuteList = createIntRange(0, 59);
+  static List<int> _secondList = createIntRange(0, 59);
+  static const double _diameterRatio = 1.2;
+  static const double _squeeze = 1.2;
+  static const double pickerHeight = 215.0;
+  static const double actionHeight = 50.0;
+  static const double pickerItemHeight = 36.0;
+  static const double dialogDividerHeight = 0.5;
 
-  final List<int> yearList = createIntRange(1970, 2050);
-  final List<int> monthList = createIntRange(1, 12);
-  final List<int> dayList = createIntRange(1, 31);
-  final List<int> hourList = createIntRange(0, 23);
-  final List<int> minuteList = createIntRange(0, 59);
-  final List<int> secondList = createIntRange(0, 59);
+  FixedExtentScrollController yearController;
+  FixedExtentScrollController monthController;
+  FixedExtentScrollController dayController;
+  FixedExtentScrollController hourController;
+  FixedExtentScrollController minuteController;
+  FixedExtentScrollController secondController;
 
-  
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoTheme(
-      data: CupertinoThemeData(),
-      child: Container(
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          margin: EdgeInsets.only(
-            bottom: 16,
-          ),
-          decoration: BoxDecoration(
-            color: CupertinoColors.white,
-            borderRadius: BorderRadius.all(Radius.circular(36)),
-          ),
-          child: Padding(
-            padding: EdgeInsets.only(
-              top: 20,
-              bottom: 12,
-              left: 20,
-              right: 20,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(
-                    left: 36,
-                    right: 36,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CupertinoButton(
-                        child: Text('取消'),
-                        onPressed: _onCancelClick,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 96,
-                        ),
-                        child: Text('请选择交易时间'),
-                      ),
-                      CupertinoButton(
-                        child: Text('确定'),
-                        onPressed: _onConfirmClick,
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: pickerHeight,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // 年
-                      CupertinoStringPicker(
-                        width: 108,
-                        itemCount: yearList.length,
-                        onSelectItemChange : _onYearChange,
-                        height: pickerHeight,
-                        defaultPosition: widget.year - yearOffset,
-                        itemBuilder: (index){
-                          return Center(
-                            child: Text('${index + yearOffset}'),
-                          );
-                        },
-                      ),
-                      Text('年'),
-
-                      // 月
-                      CupertinoStringPicker(
-                        width: 72,
-                        itemCount: monthList.length,
-                        defaultPosition: widget.month - 1,
-                        onSelectItemChange : _onMonthChange,
-                        height: pickerHeight,
-                        itemBuilder: (index){
-                          return Center(
-                            child: Text('${index+1}'),
-                          );
-                        },
-                      ),
-                      Text('月'),
-
-                      // 日
-                      CupertinoStringPicker(
-                        width: 72,
-                        itemCount: _getThisMonthDayCount(),
-                        defaultPosition: widget.day - 1,
-                        height: pickerHeight,
-                        itemBuilder: (index){
-                          return Center(
-                            child: Text('${index+1}'),
-                          );
-                        },
-                      ),
-                      Text('日'),
-
-                      // 时
-                      CupertinoStringPicker(
-                        width: 72,
-                        itemCount: hourList.length,
-                        defaultPosition: widget.hour,
-                        height: pickerHeight,
-                        itemBuilder: (index){
-                          return Center(
-                            child: Text('${index}'),
-                          );
-                        },
-                      ),
-                      Text('时'),
-
-                      // 分
-                      CupertinoStringPicker(
-                        width: 72,
-                        itemCount: minuteList.length,
-                        defaultPosition: widget.minute,
-                        height: pickerHeight,
-                        itemBuilder: (index){
-                          return Center(
-                            child: Text('${index}'),
-                          );
-                        },
-                      ),
-                      Text('分'),
-
-                      // 秒
-                      CupertinoStringPicker(
-                        width: 72,
-                        itemCount: secondList.length,
-                        defaultPosition: widget.second,
-                        height: pickerHeight,
-                        itemBuilder: (index){
-                          return Center(
-                            child: Text('${index}'),
-                          );
-                        },
-                      ),
-                      Text('秒'),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  int daysInMonth = 31;
 
   static List<int> createIntRange(int start, int end, { int step = 1 }){
     List<int> result = [];
@@ -211,43 +76,323 @@ class TimePickerDialogState extends State<TimePickerDialog>{
     return result;
   }
 
-  int _getThisMonthDayCount(){
-    int year = yearOffset + widget.year;
-    int month = widget.month;
-    DateTime dateTime = DateTime(year, month, 0);
-    dateTime.add(Duration(
-      days: -1
+
+  @override
+  void initState() {
+    super.initState();
+    yearController = FixedExtentScrollController(
+      initialItem: widget.year - _yearList[0],
+    );
+    monthController = FixedExtentScrollController(
+      initialItem: widget.month - 1,
+    );
+    daysInMonth = DateTime(widget.year, widget.month + 1, 0).add(Duration(
+        days: -1
+    )).day + 1;
+    dayController = FixedExtentScrollController(
+      initialItem: widget.day - 1,
+    );
+    hourController = FixedExtentScrollController(
+      initialItem: widget.hour,
+    );
+    minuteController = FixedExtentScrollController(
+      initialItem: widget.minute,
+    );
+    secondController = FixedExtentScrollController(
+      initialItem: widget.second,
+    );
+  }
+
+  void _rebuildDayPickList(){
+    setState(() {
+      daysInMonth = DateTime(widget.year, widget.month + 1, 0).add(Duration(
+          days: -1
+      )).day + 1;
+    });
+
+    dayController.jumpTo(dayController.position.pixels + 0.0001); // 触发日期选择器界面更新
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Column(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              behavior: Cupertino.HitTestBehavior.opaque,
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                color: Colors.transparent,
+              ),
+            ),
+          ),
+          Material(
+            child: Container(
+              color: Colors.white,
+              height: actionHeight + pickerHeight + dialogDividerHeight,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    height: actionHeight,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        FlatButton(
+                            minWidth: 62,
+                            height: actionHeight,
+                            onPressed: _onCancelPressed,
+                            child: Text('取消',
+                              style: TextStyle(
+                                color: Color(0xFF11BF57),
+                                fontSize: 16,
+                              ),
+                            )
+                        ),
+                        Expanded(
+                          child: Container(
+                            height: 0,
+                          ),
+                        ),
+                        FlatButton(
+                          minWidth: 62,
+                          height: actionHeight,
+                          onPressed: _onConfirmPressed,
+                          child: Text('确定',
+                            style: TextStyle(
+                              color: Color(0xFF11BF57),
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Divider(
+                    color: Color(0xFFD5DBE1),
+                    height: dialogDividerHeight,
+                    thickness: dialogDividerHeight,
+                  ),
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 72,
+                            height: pickerHeight,
+                            child: CupertinoPicker.builder(
+                              itemExtent: pickerItemHeight,
+                              diameterRatio: _diameterRatio,
+                              squeeze: _squeeze,
+                              scrollController: yearController,
+                              onSelectedItemChanged: _onYearChange,
+                              itemBuilder: (itemContext, index){
+                                return _buildPickerItem('${_yearList[index]}');
+                              },
+                              childCount: _yearList.length,
+                            ),
+                          ),
+                          Text('年',
+                            style: TextStyle(
+                              color: Color(0xFFADB0B5),
+                              fontSize: 20,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 50,
+                            height: pickerHeight,
+                            child: CupertinoPicker.builder(
+                              itemExtent: pickerItemHeight,
+                              diameterRatio: _diameterRatio,
+                              squeeze: _squeeze,
+                              scrollController: monthController,
+                              onSelectedItemChanged: _onMonthChange,
+                              childCount: _monthList.length,
+                              itemBuilder: (itemContext, index){
+                                return _buildPickerItem('${_monthList[index]}');
+                              },
+                            ),
+                          ),
+                          Text('月',
+                            style: TextStyle(
+                              color: Color(0xFFADB0B5),
+                              fontSize: 20,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 50,
+                            height: pickerHeight,
+                            child: CupertinoPicker.builder(
+                              itemExtent: pickerItemHeight,
+                              diameterRatio: _diameterRatio,
+                              squeeze: _squeeze,
+                              scrollController: dayController,
+                              onSelectedItemChanged: _onDayChange,
+                              childCount: daysInMonth,
+                              itemBuilder: (itemContext, index){
+                                return _buildPickerItem('${_dayList31[index]}');
+                              },
+                            ),
+                          ),
+                          Text('日',
+                            style: TextStyle(
+                              color: Color(0xFFADB0B5),
+                              fontSize: 20,
+                            ),
+                          ),
+                          Container(
+                            width: 20,
+                          ),
+                          SizedBox(
+                            width: 50,
+                            height: pickerHeight,
+                            child: CupertinoPicker.builder(
+                              itemExtent: pickerItemHeight,
+                              diameterRatio: _diameterRatio,
+                              scrollController: hourController,
+                              squeeze: _squeeze,
+                              onSelectedItemChanged: _onHourChange,
+                              childCount: _hourList.length,
+                              itemBuilder: (itemContext, index){
+                                return _buildPickerItem('${_hourList[index]}');
+                              },
+                            ),
+                          ),
+                          Text(':',
+                            style: TextStyle(
+                              color: Color(0xFFADB0B5),
+                              fontSize: 20,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 50,
+                            height: pickerHeight,
+                            child: CupertinoPicker.builder(
+                              itemExtent: pickerItemHeight,
+                              diameterRatio: _diameterRatio,
+                              squeeze: _squeeze,
+                              scrollController: minuteController,
+                              onSelectedItemChanged: _onMinuteChange,
+                              childCount: _minuteList.length,
+                              itemBuilder: (itemContext, index){
+                                return _buildPickerItem('${_minuteList[index]}');
+                              },
+                            ),
+                          ),
+                          Text(':',
+                            style: TextStyle(
+                              color: Color(0xFFADB0B5),
+                              fontSize: 20,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 50,
+                            height: pickerHeight,
+                            child: CupertinoPicker.builder(
+                              itemExtent: pickerItemHeight,
+                              diameterRatio: _diameterRatio,
+                              squeeze: _squeeze,
+                              scrollController: secondController,
+                              onSelectedItemChanged: _onSecondChange,
+                              childCount: _secondList.length,
+                              itemBuilder: (itemContext, index){
+                                return _buildPickerItem('${_secondList[index]}');
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      Cupertino.Column(
+                        children: [
+                          Divider(
+                            height: 0.5,
+                            color: Color(0xFFC6CDD4),
+                          ),
+                          Container(
+                            width: 0,
+                            height: pickerItemHeight,
+                          ),Divider(
+                            height: 0.5,
+                            color: Color(0xFFC6CDD4),
+                          )
+                        ],
+                      )
+
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  void _onYearChange(int index){
+    widget.year = _yearList[index];
+    _rebuildDayPickList();
+    // print('年 ${widget.year}');
+  }
+  
+  void _onMonthChange(int index){
+    widget.month = _monthList[index];
+    _rebuildDayPickList();
+    // print('月 ${widget.month}');
+  }
+  
+  void _onDayChange(int index){
+    widget.day = _dayList31[index];
+    // print('日 ${widget.day}');
+  }
+  
+  void _onHourChange(int index){
+    widget.hour = _hourList[index];
+    // print('时 ${widget.hour}');
+  }
+  
+  void _onMinuteChange(int index){
+    widget.minute = _minuteList[index];
+    // print('分 ${widget.minute}');
+  }
+
+  void _onSecondChange(int index){
+    widget.second = _secondList[index];
+    // print('分 ${widget.minute}');
+  }
+
+  void _onConfirmPressed(){
+    print('时间 ${widget.year}年${widget.month}月${widget.day}日  ${widget.hour}时${widget.minute}分${widget.second}秒');
+    widget.onConfirm?.call(DateTime(
+      widget.year,
+      widget.month,
+      widget.day,
+      widget.hour,
+      widget.minute,
+      widget.second,
     ));
-    print('${dateTime.year}-${dateTime.month}-${dateTime.day}');
-    return dateTime.day;
-  }
-
-  void _onYearChange(int newYear){
-    setState(() {
-      widget.year = newYear;
-    });
-  }
-
-  void _onMonthChange(int newMonth){
-    setState(() {
-      widget.month = newMonth;
-    });
-  }
-  
-  void _onConfirmClick(){
-    Navigator.pop(context, {
-      'year' : widget.year,
-      'month' : widget.month,
-      'day' : widget.day,
-      'hour' : widget.hour,
-      'minute' : widget.minute,
-      'day' : widget.day,
-      'datetime' : DateTime(widget.year, widget.month, widget.day, widget.hour, widget.minute, widget.second),
-    });
-  }
-  
-  void _onCancelClick(){
     Navigator.pop(context);
   }
 
+  void _onCancelPressed(){
+    Navigator.pop(context);
+  }
+
+  Widget _buildPickerItem(String content){
+    return Center(
+      child: Text(content,
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: 20,
+        ),
+      ),
+    );
+  }
+  
 }
+
+

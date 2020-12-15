@@ -7,7 +7,6 @@ import 'package:liquid_client/common/model/currency_model.dart';
 import 'package:liquid_client/common/model/tag_model.dart';
 import 'package:liquid_client/common/model/target_model.dart';
 import 'package:liquid_client/compoment/time_picker_dialog.dart';
-import 'package:liquid_client/page/target_add_edit_page.dart';
 import 'package:liquid_client/utils/format_util.dart';
 import 'package:provider/provider.dart';
 
@@ -241,16 +240,21 @@ class _RecordAddPageState extends State<RecordAddPage>{
     showCupertinoModalPopup(
       context: context,
       builder: (buildContext){
-        return TimePickerDialog.specify(
-            year: datetime.year,
-            month: datetime.month,
-            day: datetime.day,
-            hour: datetime.hour,
-            minute: datetime.minute,
-            second: datetime.second,
+        return TimePickerDialog(
+          year: datetime.year,
+          month: datetime.month,
+          day: datetime.day,
+          hour: datetime.hour,
+          minute: datetime.minute,
+          second: datetime.second,
+          onConfirm: _onDateTimeConfirm,
         );
       }
     );
+  }
+
+  void _onDateTimeConfirm(DateTime dateTime){
+    context.read<RecordAddPageProvider>().setTime(dateTime.millisecondsSinceEpoch);
   }
 
   void _onTargetClick(){
